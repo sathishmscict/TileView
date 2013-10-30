@@ -11,5 +11,6 @@ com.qozix.tileview.markers
 com.qozix.tileview.paths
 com.qozix.tileview.samples
 com.qozix.tileview.tiles
+com.qozix.tileview.tiles.selector
 com.qozix.utils
 com.qozix.widgets
