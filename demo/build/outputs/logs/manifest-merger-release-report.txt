@@ -1,0 +1,75 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:2:1-24:12
+	xmlns:android
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:2:11-69
+	package
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:3:5-28
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+application
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:5:5-22:19
+MERGED from [com.android.support:appcompat-v7:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/AndroidManifest.xml:22:5-20
+MERGED from [com.android.support:support-v4:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/AndroidManifest.xml:22:5-20
+MERGED from [TileView:tileview:unspecified] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/TileView/tileview/unspecified/AndroidManifest.xml:11:5-14:19
+MERGED from [com.android.support:appcompat-v7:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/AndroidManifest.xml:22:5-20
+MERGED from [com.android.support:support-v4:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/AndroidManifest.xml:22:5-20
+	android:supportsRtl
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:9:9-35
+	android:label
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:8:9-41
+	android:allowBackup
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:6:9-35
+	android:icon
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:7:9-43
+	android:theme
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:10:9-40
+activity#tileview.demo.MainActivity
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:11:9-17:20
+	android:name
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:11:19-47
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:12:13-16:29
+action#android.intent.action.MAIN
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:13:17-69
+	android:name
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:13:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:15:17-77
+	android:name
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:15:27-74
+activity#tileview.demo.BuildingPlansTileViewActivity
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:18:9-67
+	android:name
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:18:19-64
+activity#tileview.demo.FictionalMapTileViewActivity
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:19:9-66
+	android:name
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:19:19-63
+activity#tileview.demo.LargeImageTileViewActivity
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:20:9-64
+	android:name
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:20:19-61
+activity#tileview.demo.RealMapTileViewActivity
+ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:21:9-61
+	android:name
+		ADDED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml:21:19-58
+uses-sdk
+INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml reason: use-sdk injection requested
+MERGED from [com.android.support:appcompat-v7:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:support-v4:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/AndroidManifest.xml:20:5-43
+MERGED from [TileView:tileview:unspecified] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/TileView/tileview/unspecified/AndroidManifest.xml:7:5-9:41
+MERGED from [com.android.support:appcompat-v7:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:support-v4:23.0.1] /Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/AndroidManifest.xml:20:5-43
+	android:targetSdkVersion
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml
+		INJECTED from /Users/q/Repos/TileView/demo/src/main/AndroidManifest.xml

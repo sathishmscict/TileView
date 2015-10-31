@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/TileView/tileview/unspecified/jars/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="5e080f4205559bd465e625366f22d4d387c62a31">
+        <dex dex="/Users/q/Repos/TileView/demo/build/intermediates/pre-dexed/debug/classes-4202b1206a0e76d606396f919a97bbd3b5b8968f.jar" />
+    </item>
+    <item
+        jar="/Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/jars/libs/internal_impl-23.0.1.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="aa92916125166649d8ad4ba3940c3dd7515596d3">
+        <dex dex="/Users/q/Repos/TileView/demo/build/intermediates/pre-dexed/debug/internal_impl-23.0.1-f29b6afa56fad7726c36ea62d9a902038998bac8.jar" />
+    </item>
+    <item
+        jar="/Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/jars/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="d86429b0f0b3f3cafbeb78dda1b9d89119ccb05d">
+        <dex dex="/Users/q/Repos/TileView/demo/build/intermediates/pre-dexed/debug/classes-7b3e7c3609e88d7fff45ff946d092d678593d1fd.jar" />
+    </item>
+    <item
+        jar="/Users/q/Repos/TileView/demo/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/jars/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="c31e21b53ff2f74664e498248d01453a32e32d48">
+        <dex dex="/Users/q/Repos/TileView/demo/build/intermediates/pre-dexed/debug/classes-9aca93da4ae87a06ea1062a903f1e3275d326239.jar" />
+    </item>
+    <item
+        jar="/Users/q/Desktop/android/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/23.0.1/support-annotations-23.0.1.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="1fce89a6428c51467090d7f424e4c9c3dbd55f7e">
+        <dex dex="/Users/q/Repos/TileView/demo/build/intermediates/pre-dexed/debug/support-annotations-23.0.1-11fc35517ac8cdbb004762399614f1f909a64369.jar" />
+    </item>
+
+</items>
