@@ -123,8 +123,8 @@ public class DetailLevel implements Comparable<DetailLevel> {
 
   @Override
   public int hashCode() {
-    long bits = ( Double.doubleToLongBits( getScale() ) * 43 );
-    return ( ( (int) bits ) ^ ( (int) ( bits >> 32 ) ) );
+    long bits = (Double.doubleToLongBits( getScale() ) * 43);
+    return (((int) bits) ^ ((int) (bits >> 32)));
   }
 
   public static class StateNotComputedException extends IllegalStateException {
