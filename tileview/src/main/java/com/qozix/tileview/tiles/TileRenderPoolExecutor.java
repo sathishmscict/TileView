@@ -61,12 +61,16 @@ public class TileRenderPoolExecutor extends ThreadPoolExecutor {
       if( isShutdownOrTerminating() ) {
         return;
       }
+      if( tile.getState() != Tile.State.UNASSIGNED ) {
+        continue;
+      }
       TileRenderRunnable runnable = new TileRenderRunnable();
       runnable.setTile( tile );
       runnable.setContext( context );
       runnable.setBitmapProvider( bitmapProvider );
       runnable.setHandler( mHandler );
       execute( runnable );
+      tile.setState( Tile.State.PENDING_DECODE );
     }
   }
 

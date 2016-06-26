@@ -6,17 +6,15 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 
-import com.qozix.tileview.TileView;
 import com.qozix.tileview.detail.DetailLevel;
 import com.qozix.tileview.graphics.BitmapProvider;
 import com.qozix.tileview.graphics.BitmapProviderAssets;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class TileCanvasViewGroup extends View {
@@ -31,7 +29,6 @@ public class TileCanvasViewGroup extends View {
   private float mScale = 1;
 
   private BitmapProvider mBitmapProvider;
-  private HashMap<Float, TileCanvasView> mTileCanvasViewHashMap = new HashMap<>();
 
   private DetailLevel mDetailLevelToRender;
   private DetailLevel mLastRequestedDetailLevel;
@@ -50,17 +47,13 @@ public class TileCanvasViewGroup extends View {
 
   private TileRenderThrottleHandler mTileRenderThrottleHandler;
   private TileRenderListener mTileRenderListener;
+  private TileRenderThrowableListener mTileRenderThrowableListener;
 
   private int mRenderBuffer = DEFAULT_RENDER_BUFFER;
 
   private TileRenderPoolExecutor mTileRenderPoolExecutor;
 
   private Set<Tile> mTilesInCurrentViewport = new HashSet<>();
-  private Set<Tile> mTilesNotInCurrentViewport = new HashSet<>();
-  private Set<Tile> mTilesAlreadyRendered = new HashSet<>();
-  private Set<Tile> mTilesToBeRendered = new HashSet<>();
-  private Set<Tile> mTilesDecodedAndReadyToDraw = new HashSet<>();
-  private Set<Tile> mTilesDecodedAndWithinInvalidRegion = new HashSet<>();
 
   public TileCanvasViewGroup( Context context ) {
     super( context );
@@ -94,7 +87,7 @@ public class TileCanvasViewGroup extends View {
     mTransitionDuration = duration;
   }
 
-  public BitmapProvider getBitmapProvider(){
+  public BitmapProvider getBitmapProvider() {
     if( mBitmapProvider == null ) {
       mBitmapProvider = new BitmapProviderAssets();
     }
@@ -125,6 +118,9 @@ public class TileCanvasViewGroup extends View {
     mShouldRecycleBitmaps = shouldRecycleBitmaps;
   }
 
+  public void setTileRenderThrowableListener( TileRenderThrowableListener tileRenderThrowableListener ) {
+    mTileRenderThrowableListener = tileRenderThrowableListener;
+  }
 
   /**
    * The layout dimensions supplied to this ViewGroup will be exactly as large as the scaled
@@ -150,7 +146,7 @@ public class TileCanvasViewGroup extends View {
    */
   public void cancelRender() {
     mRenderIsCancelled = true;
-    if( mTileRenderPoolExecutor != null ){
+    if( mTileRenderPoolExecutor != null ) {
       mTileRenderPoolExecutor.cancel();
     }
   }
@@ -164,16 +160,18 @@ public class TileCanvasViewGroup extends View {
 
   /**
    * Draw tile bitmaps into the surface canvas displayed by this View.
+   *
    * @param canvas The Canvas instance to draw tile bitmaps into.
    */
   private void drawTiles( Canvas canvas ) {
-    for( Tile tile : mTilesDecodedAndReadyToDraw ) {
-      if( mDrawingRect.contains( tile.getScaledRect() )) {  // TODO: pass this to Tile.draw?
-        tile.draw( canvas );
-        mTilesAlreadyRendered.add( tile );
+    for( Tile tile : mTilesInCurrentViewport ) {
+      if( tile.getState() == Tile.State.DECODED && Rect.intersects( mDrawingRect, tile.getScaledRect() ) ) {  // TODO: pass this to Tile.draw?
+        boolean dirty = tile.draw( canvas );
+        if(dirty){
+          invalidate(tile.getScaledRect());
+        }
       }
     }
-    mTilesDecodedAndReadyToDraw.removeAll( mTilesAlreadyRendered );
   }
 
   public void updateTileSet( DetailLevel detailLevel ) {  // TODO: need this?
@@ -208,60 +206,57 @@ public class TileCanvasViewGroup extends View {
 
   private void beginRenderTask() {
 
-    // do we need to bother?  if visible columns and rows are same as previously computed, fast-fail
+    // if visible columns and rows are same as previously computed, fast-fail
     boolean changed = mDetailLevelToRender.computeCurrentState();  // TODO: maintain compare state here instead?
     if( !changed && mDetailLevelToRender.equals( mLastRenderedDetailLevel ) ) {
       return;
     }
 
-    // these tiles are mathematically within the current viewport
-    Set<Tile> recentlyComputedVisibleTileSet = mDetailLevelToRender.getVisibleTilesFromLastViewportComputation();
+    // determine tiles are mathematically within the current viewport; force re-computation
+    mDetailLevelToRender.computeVisibleTilesFromViewport();
 
-    // this block updates the "current" tile set to show what is and is not in viewport with most recent computation
-    for( Tile tile : mTilesInCurrentViewport ) {
-      if( !recentlyComputedVisibleTileSet.contains( tile ) ) {
-        mTilesNotInCurrentViewport.add( tile );
-      }
+    // get rid of anything outside, use previously computed intersections
+    cleanup();
+
+    boolean wereTilesAdded = mTilesInCurrentViewport.addAll( mDetailLevelToRender.getVisibleTilesFromLastViewportComputation() );
+
+    if( wereTilesAdded && mTileRenderPoolExecutor != null ) {
+      mTileRenderPoolExecutor.queue( this, mTilesInCurrentViewport );
     }
-    mTilesInCurrentViewport.addAll( recentlyComputedVisibleTileSet );
-    mTilesInCurrentViewport.removeAll( mTilesNotInCurrentViewport );
 
-    // now destroy everything not in the current viewport
-    mTilesAlreadyRendered.removeAll( mTilesNotInCurrentViewport );
-    mTilesDecodedAndReadyToDraw.removeAll( mTilesNotInCurrentViewport );  // necessary?
-    for( Tile tile : mTilesNotInCurrentViewport ) {
-      tile.destroy( mShouldRecycleBitmaps );
-    }
-    mTilesNotInCurrentViewport.clear();
-
-    // all tile mathematically in viewport, less those already rendered, get sent to the render task
-    mTilesToBeRendered.clear();
-    mTilesToBeRendered.addAll( mTilesInCurrentViewport );
-    mTilesToBeRendered.removeAll( mTilesAlreadyRendered );
-
-    if( mTileRenderPoolExecutor != null ){
-      mTileRenderPoolExecutor.queue( this, mTilesToBeRendered );
-    }
   }
 
+  /**
+   * This should seldom be necessary, as it's built into beginRenderTask
+   */
+  public void cleanup() {
+    // these tiles are mathematically within the current viewport, and should be already computed
+    Set<Tile> recentlyComputedVisibleTileSet = mDetailLevelToRender.getVisibleTilesFromLastViewportComputation();
+    // use an iterator to avoid concurrent modification
+    Iterator<Tile> tilesInCurrentViewportIterator = mTilesInCurrentViewport.iterator();
+    while( tilesInCurrentViewportIterator.hasNext() ) {
+      Tile tile = tilesInCurrentViewportIterator.next();
+      // this tile was visible previously, but is no longer, destroy and de-list it
+      if( !recentlyComputedVisibleTileSet.contains( tile ) ) {
+        tile.destroy( mShouldRecycleBitmaps );
+        // an argument could be made to invalidate this rect, but since it's no longer on the heap, lets leave the artifacts and get some benefit from gpu caching
+        tilesInCurrentViewportIterator.remove();
+      }
+    }
+
+  }
+
+
   // this tile has been decoded by the time it gets passed here
-  void addTileToCanvas(final Tile tile ) {
+  void addTileToCanvas( final Tile tile ) {
     if( !mTilesInCurrentViewport.contains( tile ) ) {
-      return;
-    }
-    if( mTilesAlreadyRendered.contains( tile )) {
-      return;
-    }
-    boolean wasAdded = mTilesDecodedAndReadyToDraw.add( tile );
-    if(!wasAdded){
       return;
     }
     tile.setTransitionsEnabled( mTransitionsEnabled );
     tile.setTransitionDuration( mTransitionDuration );
     tile.stampTime();
-    invalidate();
-    //invalidate( tile.getScaledRect() );
-    Log.d(TileView.class.getSimpleName(), "invalidating " + tile.getScaledRect().toShortString());
+    // this is key!  we're only scheduling the area the new pixels occupy for redraw
+    invalidate( tile.getScaledRect() );
   }
 
 
@@ -285,8 +280,8 @@ public class TileCanvasViewGroup extends View {
   }
 
   void handleTileRenderException( Throwable throwable ) {
-    if( throwable instanceof OutOfMemoryError ){
-      //cleanup();
+    if( mTileRenderThrowableListener != null ) {
+      mTileRenderThrowableListener.onRenderThrow( throwable );
     }
   }
 
@@ -294,13 +289,9 @@ public class TileCanvasViewGroup extends View {
     return mRenderIsCancelled;
   }
 
-  public void destroy(){
+  public void destroy() {
     mTileRenderPoolExecutor.shutdownNow();
     clear();
-    for( TileCanvasView tileGroup : mTileCanvasViewHashMap.values() ) {
-      tileGroup.clearTiles( mShouldRecycleBitmaps );
-    }
-    mTileCanvasViewHashMap.clear();
     if( !mTileRenderThrottleHandler.hasMessages( RENDER_FLAG ) ) {
       mTileRenderThrottleHandler.removeMessages( RENDER_FLAG );
     }
@@ -309,9 +300,9 @@ public class TileCanvasViewGroup extends View {
   @Override
   public void onDraw( Canvas canvas ) {
     super.onDraw( canvas );
-    canvas.getClipBounds( mDrawingRect );
     canvas.save();
     canvas.scale( mScale, mScale );
+    canvas.getClipBounds( mDrawingRect );
     drawTiles( canvas );
     canvas.restore();
   }
@@ -343,18 +334,22 @@ public class TileCanvasViewGroup extends View {
     void onRenderComplete();
   }
 
+  // ideally this would be part of TileRenderListener, but that's a breaking change
+  public interface TileRenderThrowableListener {
+    void onRenderThrow( Throwable throwable );
+  }
+
   // This runnable is required to run on UI thread
-  private Runnable mRenderPostExecuteRunnable =  new Runnable() {
+  private Runnable mRenderPostExecuteRunnable = new Runnable() {
     @Override
     public void run() {
-      if ( !mTransitionsEnabled ) {
-        // we used to cleanup() here, with invalidate
+      if( !mTransitionsEnabled ) {
+        cleanup();
       }
       if( mTileRenderListener != null ) {
         mTileRenderListener.onRenderComplete();
       }
       mLastRenderedDetailLevel = mDetailLevelToRender;
-      //invalidate();  // TODO: probably going to be inappropriate here?
       requestRender();
     }
   };

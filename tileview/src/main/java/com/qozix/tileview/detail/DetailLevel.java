@@ -19,6 +19,8 @@ public class DetailLevel implements Comparable<DetailLevel> {
 
   private StateSnapshot mLastStateSnapshot;
 
+  private Set<Tile> mTilesVisibleInViewport = new HashSet<>();
+
   public DetailLevel( DetailLevelManager detailLevelManager, float scale, Object data, int tileWidth, int tileHeight ) {
     mDetailLevelManager = detailLevelManager;
     mScale = scale;
@@ -62,20 +64,23 @@ public class DetailLevel implements Comparable<DetailLevel> {
     if( mLastStateSnapshot == null ) {
       throw new StateNotComputedException();
     }
-    Set<Tile> intersections = new HashSet<>();
+    return mTilesVisibleInViewport;
+  }
+
+  public void computeVisibleTilesFromViewport() {
+    mTilesVisibleInViewport.clear();
     for( int rowCurrent = mLastStateSnapshot.rowStart; rowCurrent < mLastStateSnapshot.rowEnd; rowCurrent++ ) {
       for( int columnCurrent = mLastStateSnapshot.columnStart; columnCurrent < mLastStateSnapshot.columnEnd; columnCurrent++ ) {
         Tile tile = new Tile( columnCurrent, rowCurrent, mTileWidth, mTileHeight, mData, this );
-        intersections.add( tile );
+        mTilesVisibleInViewport.add( tile );
       }
     }
-    return intersections;
   }
 
   /**
    * Ensures that computeCurrentState will return true, indicating a change has occurred.
    */
-  public void invalidate(){
+  public void invalidate() {
     mLastStateSnapshot = null;
   }
 
@@ -118,15 +123,15 @@ public class DetailLevel implements Comparable<DetailLevel> {
 
   @Override
   public int hashCode() {
-    long bits = (Double.doubleToLongBits( getScale() ) * 43);
-    return (((int) bits) ^ ((int) (bits >> 32)));
+    long bits = ( Double.doubleToLongBits( getScale() ) * 43 );
+    return ( ( (int) bits ) ^ ( (int) ( bits >> 32 ) ) );
   }
 
   public static class StateNotComputedException extends IllegalStateException {
-    public StateNotComputedException(){
-      super("Grid has not been computed; " +
+    public StateNotComputedException() {
+      super( "Grid has not been computed; " +
         "you must call computeCurrentState at some point prior to calling " +
-        "getVisibleTilesFromLastViewportComputation.");
+        "getVisibleTilesFromLastViewportComputation." );
     }
   }
 
