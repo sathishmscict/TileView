@@ -154,14 +154,14 @@ public class Tile {
   }
 
   public boolean getIsDirty() {
-    if(!mTransitionsEnabled){
+    if( !mTransitionsEnabled ) {
       return false;
     }
-    if(getRendered() < 1f){
+    if( getRendered() < 1f ) {
       mHasReportedDirtyAtFullOpacity = false;
       return true;
     }
-    if(mHasReportedDirtyAtFullOpacity){
+    if( mHasReportedDirtyAtFullOpacity ) {
       return false;
     }
     mHasReportedDirtyAtFullOpacity = true;
@@ -176,7 +176,7 @@ public class Tile {
       mPaint = new Paint();
     }
     float rendered = getRendered();
-    int opacity = (int) ( rendered * 255 );
+    int opacity = (int) (rendered * 255);
     mPaint.setAlpha( opacity );
     return mPaint;
   }
@@ -213,7 +213,7 @@ public class Tile {
     int hash = 17;
     hash = hash * 31 + getColumn();
     hash = hash * 31 + getRow();
-    hash = hash * 31 + (int) ( 1000 * getDetailLevel().getScale() );
+    hash = hash * 31 + (int) (1000 * getDetailLevel().getScale());
     return hash;
   }
 
