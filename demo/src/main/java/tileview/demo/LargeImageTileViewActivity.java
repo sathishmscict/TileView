@@ -27,13 +27,14 @@ public class LargeImageTileViewActivity extends TileViewActivity {
 		tileView.addDetailLevel( 0.125f, "tiles/painting/125/%d_%d.jpg");
 		
 		// set mScale to 0, but keep scaleToFit true, so it'll be as small as possible but still match the container
-		tileView.setScale( 0 );
-		
+		//tileView.setScale( 0 );
+		tileView.setScale( 0.5f );
+
 		// let's use 0-1 positioning...
 		tileView.defineBounds( 0, 0, 1, 1 );
 		
 		// frame to center
-		frameTo( 0.5, 0.5 );
+		//frameTo( 0.5, 0.5 );
 
 		// render while panning
 		tileView.setShouldRenderWhilePanning( true );

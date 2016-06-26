@@ -57,12 +57,12 @@ public class Tile {
     mData = data;
     mDetailLevel = detailLevel;
     mDetailLevelScale = mDetailLevel.getScale();
-    mIntrinsicRect.set(mLeft, mTop, mRight, mBottom);
+    mIntrinsicRect.set(0, 0, mWidth, mHeight);
     mScaledRect.set(  // TODO: maybe RectF and round at final computation - to avoid 1.51 + 1.51 + 1.51 - 1.99
-      FloatMathHelper.scale(mLeft, mDetailLevelScale),
-      FloatMathHelper.scale(mTop, mDetailLevelScale),
-      FloatMathHelper.scale(mRight, mDetailLevelScale),
-      FloatMathHelper.scale(mBottom, mDetailLevelScale)
+      FloatMathHelper.unscale(mLeft, mDetailLevelScale),
+      FloatMathHelper.unscale(mTop, mDetailLevelScale),
+      FloatMathHelper.unscale(mRight, mDetailLevelScale),
+      FloatMathHelper.unscale(mBottom, mDetailLevelScale)
     );
   }
 

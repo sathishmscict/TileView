@@ -6,8 +6,10 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 
+import com.qozix.tileview.TileView;
 import com.qozix.tileview.detail.DetailLevel;
 import com.qozix.tileview.graphics.BitmapProvider;
 import com.qozix.tileview.graphics.BitmapProviderAssets;
@@ -165,12 +167,13 @@ public class TileCanvasViewGroup extends View {
    * @param canvas The Canvas instance to draw tile bitmaps into.
    */
   private void drawTiles( Canvas canvas ) {
-    mTilesDecodedAndWithinInvalidRegion.clear();
     for( Tile tile : mTilesDecodedAndReadyToDraw ) {
       if( mDrawingRect.contains( tile.getScaledRect() )) {  // TODO: pass this to Tile.draw?
         tile.draw( canvas );
+        mTilesAlreadyRendered.add( tile );
       }
     }
+    mTilesDecodedAndReadyToDraw.removeAll( mTilesAlreadyRendered );
   }
 
   public void updateTileSet( DetailLevel detailLevel ) {  // TODO: need this?
@@ -224,6 +227,8 @@ public class TileCanvasViewGroup extends View {
     mTilesInCurrentViewport.removeAll( mTilesNotInCurrentViewport );
 
     // now destroy everything not in the current viewport
+    mTilesAlreadyRendered.removeAll( mTilesNotInCurrentViewport );
+    mTilesDecodedAndReadyToDraw.removeAll( mTilesNotInCurrentViewport );  // necessary?
     for( Tile tile : mTilesNotInCurrentViewport ) {
       tile.destroy( mShouldRecycleBitmaps );
     }
@@ -244,12 +249,19 @@ public class TileCanvasViewGroup extends View {
     if( !mTilesInCurrentViewport.contains( tile ) ) {
       return;
     }
+    if( mTilesAlreadyRendered.contains( tile )) {
+      return;
+    }
+    boolean wasAdded = mTilesDecodedAndReadyToDraw.add( tile );
+    if(!wasAdded){
+      return;
+    }
     tile.setTransitionsEnabled( mTransitionsEnabled );
     tile.setTransitionDuration( mTransitionDuration );
     tile.stampTime();
-    mTilesDecodedAndReadyToDraw.add( tile );
-    mTilesAlreadyRendered.add( tile );
-    invalidate( tile.getScaledRect() );
+    invalidate();
+    //invalidate( tile.getScaledRect() );
+    Log.d(TileView.class.getSimpleName(), "invalidating " + tile.getScaledRect().toShortString());
   }
 
 
