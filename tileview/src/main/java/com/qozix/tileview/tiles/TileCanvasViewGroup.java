@@ -167,8 +167,8 @@ public class TileCanvasViewGroup extends View {
     for( Tile tile : mTilesInCurrentViewport ) {
       if( tile.getState() == Tile.State.DECODED && Rect.intersects( mDrawingRect, tile.getScaledRect() ) ) {  // TODO: pass this to Tile.draw?
         boolean dirty = tile.draw( canvas );
-        if(dirty){
-          invalidate(tile.getScaledRect());
+        if( dirty ) {
+          invalidate( tile.getScaledRect() );
         }
       }
     }
