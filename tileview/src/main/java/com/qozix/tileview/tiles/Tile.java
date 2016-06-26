@@ -4,9 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.view.animation.AnimationUtils;
 
 import com.qozix.tileview.detail.DetailLevel;
+import com.qozix.tileview.geom.FloatMathHelper;
 import com.qozix.tileview.graphics.BitmapProvider;
 
 public class Tile {
@@ -17,12 +19,19 @@ public class Tile {
   private int mHeight;
   private int mLeft;
   private int mTop;
+  private int mRight;
+  private int mBottom;
 
   private int mRow;
   private int mColumn;
 
+  private float mDetailLevelScale;
+
   private Object mData;
   private Bitmap mBitmap;
+
+  private Rect mIntrinsicRect = new Rect();
+  private Rect mScaledRect = new Rect();
 
   public double renderTimestamp;
 
@@ -36,15 +45,25 @@ public class Tile {
 
   private DetailLevel mDetailLevel;
 
-  public Tile( int column, int row, int width, int height, Object data, DetailLevel detailLevel ) {
+  public Tile(int column, int row, int width, int height, Object data, DetailLevel detailLevel) {
     mRow = row;
     mColumn = column;
     mWidth = width;
     mHeight = height;
     mLeft = column * width;
     mTop = row * height;
+    mRight = mLeft + mWidth;
+    mBottom = mTop + mHeight;
     mData = data;
     mDetailLevel = detailLevel;
+    mDetailLevelScale = mDetailLevel.getScale();
+    mIntrinsicRect.set(mLeft, mTop, mRight, mBottom);
+    mScaledRect.set(  // TODO: maybe RectF and round at final computation - to avoid 1.51 + 1.51 + 1.51 - 1.99
+      FloatMathHelper.scale(mLeft, mDetailLevelScale),
+      FloatMathHelper.scale(mTop, mDetailLevelScale),
+      FloatMathHelper.scale(mRight, mDetailLevelScale),
+      FloatMathHelper.scale(mBottom, mDetailLevelScale)
+    );
   }
 
   public int getWidth() {
@@ -83,7 +102,11 @@ public class Tile {
     return mBitmap != null;
   }
 
-  public void setTransitionDuration( int transitionDuration ) {
+  public Rect getScaledRect() {
+    return mScaledRect;
+  }
+
+  public void setTransitionDuration(int transitionDuration) {
     mTransitionDuration = transitionDuration;
   }
 
@@ -91,7 +114,7 @@ public class Tile {
     renderTimestamp = AnimationUtils.currentAnimationTimeMillis();
   }
 
-  public void setTransitionsEnabled( boolean enabled ) {
+  public void setTransitionsEnabled(boolean enabled) {
     mTransitionsEnabled = enabled;
   }
 
@@ -100,13 +123,13 @@ public class Tile {
   }
 
   public float getRendered() {
-    if( !mTransitionsEnabled ) {
+    if(!mTransitionsEnabled) {
       return 1;
     }
     double now = AnimationUtils.currentAnimationTimeMillis();
     double ellapsed = now - renderTimestamp;
-    float progress = (float) Math.min( 1, ellapsed / mTransitionDuration );
-    if( progress == 1 ) {
+    float progress = (float) Math.min(1, ellapsed / mTransitionDuration);
+    if(progress == 1) {
       mTransitionsEnabled = false;
     }
     return progress;
@@ -117,40 +140,40 @@ public class Tile {
   }
 
   public Paint getPaint() {
-    if( !mTransitionsEnabled ) {
+    if(!mTransitionsEnabled) {
       return null;
     }
-    if( mPaint == null ) {
+    if(mPaint == null) {
       mPaint = new Paint();
     }
     float rendered = getRendered();
     int opacity = (int) (rendered * 255);
-    mPaint.setAlpha( opacity );
+    mPaint.setAlpha(opacity);
     return mPaint;
   }
 
-  void generateBitmap( Context context, BitmapProvider bitmapProvider ) {
-    if( mBitmap != null ) {
+  void generateBitmap(Context context, BitmapProvider bitmapProvider) {
+    if(mBitmap != null) {
       return;
     }
-    mBitmap = bitmapProvider.getBitmap( this, context );
+    mBitmap = bitmapProvider.getBitmap(this, context);
   }
 
-  void setParentTileCanvasView( TileCanvasView tileCanvasView ) {
+  void setParentTileCanvasView(TileCanvasView tileCanvasView) {
     mParentTileCanvasView = tileCanvasView;
   }
 
-  void destroy( boolean shouldRecycle ) {
-    destroy( shouldRecycle, true );
+  void destroy(boolean shouldRecycle) {
+    destroy(shouldRecycle, true);
   }
 
-  void destroy( boolean shouldRecycle, boolean shouldRemove ) {
-    if( shouldRecycle && mBitmap != null && !mBitmap.isRecycled() ) {
+  void destroy(boolean shouldRecycle, boolean shouldRemove) {
+    if(shouldRecycle && mBitmap != null && !mBitmap.isRecycled()) {
       mBitmap.recycle();
     }
     mBitmap = null;
-    if( shouldRemove && mParentTileCanvasView != null ) {
-      mParentTileCanvasView.removeTile( this );
+    if(shouldRemove && mParentTileCanvasView != null) {
+      mParentTileCanvasView.removeTile(this);
     }
   }
 
@@ -158,9 +181,9 @@ public class Tile {
    * @param canvas The canvas the tile's bitmap should be drawn into
    * @return True if the tile is dirty (drawing output has changed and needs parent validation)
    */
-  boolean draw( Canvas canvas ) {
-    if( mBitmap != null ) {
-      canvas.drawBitmap( mBitmap, mLeft, mTop, getPaint() );
+  boolean draw(Canvas canvas) {  // TODO: this might squish edge images
+    if(mBitmap != null) {
+      canvas.drawBitmap(mBitmap, mIntrinsicRect, mScaledRect, getPaint());
     }
     return getIsDirty();
   }
@@ -175,11 +198,11 @@ public class Tile {
   }
 
   @Override
-  public boolean equals( Object o ) {
-    if( this == o ){
+  public boolean equals(Object o) {
+    if(this == o) {
       return true;
     }
-    if( o instanceof Tile ) {
+    if(o instanceof Tile) {
       Tile m = (Tile) o;
       return m.getRow() == getRow()
         && m.getColumn() == getColumn()
